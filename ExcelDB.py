@@ -20,7 +20,7 @@ def load_workbook(filename: str):
 
 
 def get_data(start_row: int, end_row: int, start_column: int, end_column: str):
-    end_column = end_column.upper()  # Convert input to uppercase for consistency
+    end_column = end_column.upper()
     number = 0
     for char in end_column:
         number = number * 26 + (ord(char) - ord('A')) + 1
