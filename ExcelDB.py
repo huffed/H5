@@ -62,3 +62,5 @@ def get_campsites(start_row: int = None, end_row: int = None, start_column: int 
 
 
 load_workbook("Mock database.xlsx")
+
+__all__ = ["get_schools", "get_instructors", "get_campsites"]
