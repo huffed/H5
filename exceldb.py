@@ -82,7 +82,6 @@ class Spreadsheet:
         """
         self.filename = filename
         self.sheet = load_workbook(self.filename)
-        self.databases = {}
 
     def __setitem__(self, name: str, dictionary: DataBase):
         """
@@ -97,7 +96,7 @@ class Spreadsheet:
             if " " in name:
                 raise ValueError(f"Invalid character in database name ({name}) - space")
 
-            self.databases[name] = dictionary
+            setattr(self, name, dictionary)
         except Exception as e:
             print(f"Error: {str(e)}")
 
@@ -111,8 +110,8 @@ class Spreadsheet:
         """
         if name is None:
             return self.sheet
-        elif name in self.databases:
-            return self.databases[name].data
+        elif hasattr(self, name):
+            return getattr(self, name).data
         else:
             raise KeyError(f"Database '{name}' does not exist in the spreadsheet.")
 
@@ -127,7 +126,7 @@ class Spreadsheet:
         try:
             return object.__getattribute__(self, attr)
         except AttributeError:
-            if attr in self.databases:
-                return self.databases[attr].data
+            if hasattr(self, attr):
+                return getattr(self, attr).data
             else:
-                raise AttributeError(f"'DataFrame' object has no attribute '{attr}'")
+                raise AttributeError(f"'Spreadsheet' object has no attribute '{attr}'")
