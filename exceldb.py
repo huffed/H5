@@ -97,3 +97,34 @@ class Spreadsheet:
             self.databases[name] = dictionary
         except Exception as e:
             return f"Error: {str(e)}"
+
+    def __getitem__(self, name: str) -> dict or None:
+        """
+        Retrieves the specified database by name.
+
+        :param name: The name of the database.
+
+        :return: The database's data dictionary if it exists, None otherwise.
+        """
+        if name is None:
+            return self.sheet
+        elif name in self.databases:
+            return self.databases[name].data
+        else:
+            raise KeyError(f"Database '{name}' does not exist in the spreadsheet.")
+
+    def __getattr__(self, attr: str) -> dict or None:
+        """
+        Retrieves the specified database by name.
+
+        :param attr: The name of the attribute.
+
+        :return: The database's data dictionary if it exists, None otherwise.
+        """
+        try:
+            return object.__getattribute__(self, attr)
+        except AttributeError:
+            if attr in self.databases:
+                return self.databases[attr].data
+            else:
+                raise AttributeError(f"'DataFrame' object has no attribute '{attr}'")
