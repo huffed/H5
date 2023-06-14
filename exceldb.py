@@ -94,9 +94,12 @@ class Spreadsheet:
         :return: An error message as a string if an exception occurs, otherwise None.
         """
         try:
+            if " " in name:
+                raise ValueError(f"Invalid character in database name ({name}) - space")
+
             self.databases[name] = dictionary
         except Exception as e:
-            return f"Error: {str(e)}"
+            print(f"Error: {str(e)}")
 
     def __getitem__(self, name: str) -> dict or None:
         """
