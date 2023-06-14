@@ -32,7 +32,7 @@ def get_data(worksheet, start_row: int, end_row: int, start_column: int, end_col
                 for column in range(start_column, end_column + 1)
                 if column > start_column or row > start_row
             }
-            for row in range(start_row + 1, end_row)
+            for row in range(start_row + 1, end_row + 1)
         }
     except Exception as e:
         return f"An error occurred while getting data: {str(e)}"
