@@ -1,7 +1,10 @@
+from typing import Union, Dict, Any
+
 import openpyxl
 
 
-def get_data(worksheet, start_row: int, end_row: int, start_column: int, end_column: str) -> dict or str:
+def get_data(worksheet, start_row: int, end_row: int,
+             start_column: int, end_column: str) -> Union[Dict[str, Dict[str, Any]], str]:
     """
     Retrieves data from the given worksheet based on the specified range.
 
@@ -35,12 +38,13 @@ def get_data(worksheet, start_row: int, end_row: int, start_column: int, end_col
             for row in range(start_row + 1, end_row + 1)
         }
     except Exception as e:
-        return f"An error occurred while getting data: {str(e)}"
+        raise Exception(f"An error occurred while getting data: {str(e)}")
     return data
 
 
 class DataBase:
-    def __init__(self, worksheet, start_row: int, end_row: int, end_column: str, start_column: int = 2):
+    def __init__(self, worksheet, start_row: int, end_row: int,
+                 end_column: str, start_column: int = 2):
         """
         Represents a database created from the specified worksheet.
 
@@ -55,7 +59,7 @@ class DataBase:
         self.columns = list(self.data[self.index[0]].keys())
 
 
-def load_workbook(filename: str) -> dict or str:
+def load_workbook(filename: str):
     """
     Loads the workbook from the specified file and returns the active worksheet object.
 
@@ -68,9 +72,9 @@ def load_workbook(filename: str) -> dict or str:
         worksheet = workbook.active
         return worksheet
     except FileNotFoundError:
-        return f"Error: File '{filename}' not found."
+        raise FileNotFoundError(f"Error: File '{filename}' not found.")
     except Exception as e:
-        return f"An error occurred while loading the workbook: {str(e)}"
+        raise Exception(f"An error occurred while loading the workbook: {str(e)}")
 
 
 class Spreadsheet:
@@ -83,50 +87,45 @@ class Spreadsheet:
         self.filename = filename
         self.sheet = load_workbook(self.filename)
 
-    def __setitem__(self, name: str, dictionary: DataBase):
+    def __setitem__(self, name: str, database: DataBase):
         """
-        Sets the specified dictionary as a database with the given name.
+        Sets the specified database with the given name.
 
         :param name: The name of the database.
-        :param dictionary: The dictionary representing the database.
+        :param database: The database object representing the database.
 
-        :return: An error message as a string if an exception occurs, otherwise None.
+        :raises ValueError: If the database name contains invalid characters (e.g., space).
         """
-        try:
-            if " " in name:
-                raise ValueError(f"Invalid character in database name ({name}) - space")
+        if " " in name:
+            raise ValueError(f"Invalid character in database name ({name}) - space")
+        setattr(self, name, database)
 
-            setattr(self, name, dictionary)
-        except Exception as e:
-            print(f"Error: {str(e)}")
-
-    def __getitem__(self, name: str) -> dict or None:
+    def __getitem__(self, name: str) -> Union[Dict[str, Dict[str, Any]], None]:
         """
         Retrieves the specified database by name.
 
         :param name: The name of the database.
 
         :return: The database's data dictionary if it exists, None otherwise.
+
+        :raises AttributeError: If the specified database does not exist.
         """
-        if name is None:
-            return self.sheet
-        elif hasattr(self, name):
+        if hasattr(self, name):
             return getattr(self, name).data
         else:
-            raise KeyError(f"Database '{name}' does not exist in the spreadsheet.")
+            raise AttributeError(f"'Spreadsheet' object has no attribute '{name}'")
 
-    def __getattr__(self, attr: str) -> dict or None:
+    def __getattr__(self, attr: str) -> Union[Dict[str, Dict[str, Any]], None]:
         """
         Retrieves the specified database by name.
 
         :param attr: The name of the attribute.
 
         :return: The database's data dictionary if it exists, None otherwise.
+
+        :raises AttributeError: If the specified attribute does not exist.
         """
-        try:
-            return object.__getattribute__(self, attr)
-        except AttributeError:
-            if hasattr(self, attr):
-                return getattr(self, attr).data
-            else:
-                raise AttributeError(f"'Spreadsheet' object has no attribute '{attr}'")
+        if hasattr(self, attr):
+            return getattr(self, attr).data
+        else:
+            raise AttributeError(f"'Spreadsheet' object has no attribute '{attr}'")
