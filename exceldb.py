@@ -1,3 +1,4 @@
+import json
 from typing import Union, Dict, Any
 
 import openpyxl
@@ -129,3 +130,9 @@ class Spreadsheet:
             return getattr(self, attr).data
         else:
             raise AttributeError(f"'Spreadsheet' object has no attribute '{attr}'")
+
+    def to_json(self, filename="databases"):
+        databases = {name: getattr(self, name).data for name in dir(self) if isinstance(getattr(self, name), DataBase)}
+
+        with open(f"{filename}.json", "w") as outfile:
+            json.dump(databases, outfile)
